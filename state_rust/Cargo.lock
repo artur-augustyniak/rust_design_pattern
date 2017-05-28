@@ -1,4 +1,4 @@
 [root]
-name = "state"
+name = "state_rust"
 version = "0.1.0"
 

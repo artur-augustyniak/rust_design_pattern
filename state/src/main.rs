@@ -1,90 +1,21 @@
-extern crate rand;
+extern crate state;
 
-use self::rand::Rng;
-
-
-trait SpeedController {
-    fn stop(&self);
-}
-
-struct EmergencyBrake;
-
-impl SpeedController for EmergencyBrake {
-    fn stop(&self) {
-        println!("stop using EMERGENCY brake !!!");
-    }
-}
+use state::Post;
 
 
-struct PanicBrake;
-
-impl SpeedController for PanicBrake {
-    fn stop(&self) {
-        println!("stop using PANIC brake !!!");
-    }
-}
-
-
-struct RegularBrake {
-    emergency_brake: Box<SpeedController>
-}
-
-impl<'a> SpeedController for RegularBrake {
-    fn stop(&self) {
-        let mut rng = rand::thread_rng();
-        if rng.gen() {
-            println!("stop using regular brake...");
-        } else {
-            self.emergency_brake.stop();
-        }
-    }
-}
-
-struct BrakeSystem {
-    current_brake: Box<SpeedController>
-}
-
-
-impl SpeedController for BrakeSystem {
-    fn stop(&self) {
-        self.current_brake.stop();
-    }
-}
-
-
-struct BrakeSystemBuilder {
-    emergency_subsystem: Box<SpeedController>,
-
-}
-
-impl BrakeSystemBuilder {
-    fn new() -> BrakeSystemBuilder {
-        BrakeSystemBuilder {
-            emergency_subsystem: Box::new(EmergencyBrake)
-        }
-    }
-
-    fn change_emergency_brake(mut self, emb: Box<SpeedController>) -> BrakeSystemBuilder {
-        self.emergency_subsystem = emb;
-        self
-    }
-
-
-    fn finalize(self) -> BrakeSystem {
-        BrakeSystem {
-            current_brake: Box::new(
-                RegularBrake { emergency_brake: self.emergency_subsystem }
-            )
-        }
-    }
-}
-
+//A blog post starts as an empty draft.
+//Once the draft is done, we request a review of the post.
+//Once the post is approved, it gets published.
+//Only published blog posts return content to print so that we can't accidentally print the text of a post that hasn't been approved.
 fn main() {
-    let bs = BrakeSystemBuilder::new()
-        .change_emergency_brake(Box::new(PanicBrake))
-        .finalize();
+    let mut post = Post::new();
 
-    for _ in 0..10 {
-        bs.stop();
-    }
+    post.add_text("I ate a salad for lunch today");
+    assert_eq!("", post.content());
+
+    post.request_review();
+    assert_eq!("", post.content());
+
+    post.approve();
+    assert_eq!("I ate a salad for lunch today", post.content());
 }
