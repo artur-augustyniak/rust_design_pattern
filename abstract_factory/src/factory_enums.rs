@@ -1,7 +1,3 @@
-pub trait ICar {
-    fn ride(&self);
-}
-
 enum Car {
     Sedan,
     Coupe,
@@ -22,7 +18,7 @@ fn generalized_run(c: Car) {
     c.ride();
 }
 
-fn main() {
+pub fn run() {
     generalized_run(Car::Sedan);
     generalized_run(Car::Coupe);
     Car::Coupe.ride();

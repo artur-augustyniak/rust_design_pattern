@@ -1,6 +1,0 @@
-[package]
-name = "oo-rust"
-version = "0.1.0"
-authors = ["Artur Augustyniak <artur@aaugustyniak.pl>"]
-
-[dependencies]
