@@ -42,7 +42,7 @@ impl<'a> SpeedController for BrakeSystem<'a> {
 }
 
 
-fn main() {
+pub fn run() {
     let e = EmergencyBrake;
     let r = RegularBrake { emergency_brake: &e };
     let bs = BrakeSystem { current_brake: &r };

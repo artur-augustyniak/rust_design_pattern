@@ -1,12 +1,14 @@
 pub mod abstract_factory_trait_objects;
-pub mod abstract_factory_assoc_types;
-pub mod abstract_factory_generics;
+pub mod factory_assoc_types;
+pub mod factory_generics;
 pub mod factory_enums;
+pub mod factory_pool_closures;
 
 use abstract_factory_trait_objects::run as t_obj_run;
-use abstract_factory_assoc_types::run as assoc_t_run;
-use abstract_factory_generics::run as generic_run;
+use factory_assoc_types::run as assoc_t_run;
+use factory_generics::run as generic_run;
 use factory_enums::run as enums_run;
+use factory_pool_closures::run as closure_run;
 
 pub trait Car {
     fn ride(&self);
@@ -44,4 +46,7 @@ fn main() {
     generic_run();
     println!("~~~~ Enums factory ~~~~");
     enums_run();
+    println!("~~~~ Closure factory ~~~~");
+    closure_run();
+
 }

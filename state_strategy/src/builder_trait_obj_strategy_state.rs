@@ -79,7 +79,7 @@ impl BrakeSystemBuilder {
     }
 }
 
-fn main() {
+pub fn run() {
     let bs: BrakeSystem = BrakeSystemBuilder::new()
         .change_emergency_brake(Box::new(PanicBrake))
         .finalize();

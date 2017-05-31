@@ -1,21 +1,11 @@
-extern crate state;
+pub mod state_trait_objects;
+pub mod state_type_encoded;
+use state_trait_objects::run as t_obj_run;
+use state_type_encoded::run as type_enc_run;
 
-use state::Post;
 
-
-//A blog post starts as an empty draft.
-//Once the draft is done, we request a review of the post.
-//Once the post is approved, it gets published.
-//Only published blog posts return content to print so that we can't accidentally print the text of a post that hasn't been approved.
 fn main() {
-    let mut post = Post::new();
+    t_obj_run();
+    type_enc_run();
 
-    post.add_text("I ate a salad for lunch today");
-    assert_eq!("", post.content());
-
-    post.request_review();
-    assert_eq!("", post.content());
-
-    post.approve();
-    assert_eq!("I ate a salad for lunch today", post.content());
 }

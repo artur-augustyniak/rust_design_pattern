@@ -1,7 +1,0 @@
-[package]
-name = "factory_closure_lazy"
-version = "0.1.0"
-authors = ["Artur Augustyniak <artur@aaugustyniak.pl>"]
-
-[dependencies]
-rand="=0.3.14"

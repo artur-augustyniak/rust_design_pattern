@@ -1,8 +1,8 @@
-pub struct Post {
+struct Post {
     content: String,
 }
 
-pub struct DraftPost {
+struct DraftPost {
     content: String,
 }
 
@@ -30,7 +30,7 @@ impl DraftPost {
     }
 }
 
-pub struct PendingReviewPost {
+struct PendingReviewPost {
     content: String,
 }
 
@@ -40,4 +40,17 @@ impl PendingReviewPost {
             content: self.content,
         }
     }
+}
+
+
+pub fn run() {
+    let mut post = Post::new();
+
+    post.add_text("I ate a salad for lunch today");
+
+    let post = post.request_review();
+
+    let post = post.approve();
+
+    assert_eq!("I ate a salad for lunch today", post.content());
 }

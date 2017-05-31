@@ -1,4 +1,4 @@
-pub struct Post {
+struct Post {
     state: Option<Box<State>>,
     content: String,
 }
@@ -35,11 +35,10 @@ impl Post {
 trait State {
     fn request_review(self: Box<Self>) -> Box<State>;
     fn approve(self: Box<Self>) -> Box<State>;
-
+    #[allow(unused_variables)]
     fn content<'a>(&self, post: &'a Post) -> &'a str {
         ""
     }
-
 }
 
 struct Draft {}
@@ -80,5 +79,22 @@ impl State for Published {
     fn content<'a>(&self, post: &'a Post) -> &'a str {
         &post.content
     }
+}
 
+
+//A blog post starts as an empty draft.
+//Once the draft is done, we request a review of the post.
+//Once the post is approved, it gets published.
+//Only published blog posts return content to print so that we can't accidentally print the text of a post that hasn't been approved.
+pub fn run() {
+    let mut post = Post::new();
+
+    post.add_text("I ate a salad for lunch today");
+    assert_eq!("", post.content());
+
+    post.request_review();
+    assert_eq!("", post.content());
+
+    post.approve();
+    assert_eq!("I ate a salad for lunch today", post.content());
 }
