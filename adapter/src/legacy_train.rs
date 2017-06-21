@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum Direction {
     Forward,
     Backward
@@ -9,26 +9,16 @@ pub trait LegacyMovable {
     fn print(&self);
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct LegacyTrain {
-    d: Direction,
-    v: u32,
+    pub d: Direction,
+    pub  v: u32,
 }
 
 impl LegacyTrain {
     pub fn new(d: Direction, v: u32) -> LegacyTrain {
         LegacyTrain { d: d, v: v }
     }
-
-    pub fn get_dir(&self)-> &Direction{
-        return &self.d
-    }
-
-
-    pub fn get_v(&self)-> u32{
-        return self.v
-    }
-
 }
 
 impl LegacyMovable for LegacyTrain {

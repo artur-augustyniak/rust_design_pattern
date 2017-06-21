@@ -20,14 +20,14 @@ impl CurrentMovable for LegacyTrainAdaptor {
     }
 
     fn accelerate(&mut self, t: Duration) -> i32 {
-        match *self.adaptee.get_dir() {
+        match self.adaptee.d {
             Direction::Forward => {
-                let v = self.adaptee.get_v() as i32 + (TRAIN_ACCELERATION * t.as_secs() as u32) as i32;
+                let v = self.adaptee.v as i32 + (TRAIN_ACCELERATION * t.as_secs() as u32) as i32;
                 self.adaptee.ride(Direction::Forward, v as u32);
                 v
             }
             Direction::Backward => {
-                let v = self.adaptee.get_v() as i32 - (TRAIN_ACCELERATION * t.as_secs() as u32) as i32;
+                let v = self.adaptee.v as i32 - (TRAIN_ACCELERATION * t.as_secs() as u32) as i32;
                 self.adaptee.ride(Direction::Backward, v as u32);
                 v
             }
@@ -35,9 +35,9 @@ impl CurrentMovable for LegacyTrainAdaptor {
     }
 
     fn decelerate(&mut self, t: Duration) -> i32 {
-        match *self.adaptee.get_dir() {
+        match self.adaptee.d {
             Direction::Forward => {
-                let v = self.adaptee.get_v() as i32 - (TRAIN_ACCELERATION * t.as_secs() as u32) as i32;
+                let v = self.adaptee.v as i32 - (TRAIN_ACCELERATION * t.as_secs() as u32) as i32;
                 if v < 0 {
                     self.adaptee.ride(Direction::Backward, v.abs() as u32);
                 } else {
@@ -46,7 +46,7 @@ impl CurrentMovable for LegacyTrainAdaptor {
                 v
             }
             Direction::Backward => {
-                let v = self.adaptee.get_v() as i32 + (TRAIN_ACCELERATION * t.as_secs() as u32) as i32;
+                let v = self.adaptee.v as i32 + (TRAIN_ACCELERATION * t.as_secs() as u32) as i32;
                 self.adaptee.ride(Direction::Backward, v as u32);
                 v
             }

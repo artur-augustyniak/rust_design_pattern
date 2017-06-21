@@ -5,9 +5,12 @@ use super::legacy_train::*;
 
 use super::current_functional_train::*;
 
+pub const ACCELERATION: u64 = 2;
+
 pub trait ChangeVelocity {
     fn accelerate(self, t: Duration) -> ImmutableLegacyTrainAdaptor;
     fn decelerate(self, t: Duration) -> ImmutableLegacyTrainAdaptor;
+    fn textural_dump(self) -> ImmutableLegacyTrainAdaptor;
 }
 
 #[derive(Debug)]
@@ -16,67 +19,44 @@ pub struct ImmutableLegacyTrainAdaptor {
 }
 
 
-fn recreate_adaptee(v: i32) -> ImmutableLegacyTrainAdaptor {
-    let threshold = 0;
-    match v.cmp(&threshold) {
-        Ordering::Less => {
-            let tmp = ImmutableLegacyTrainAdaptor { adaptee: LegacyTrain::new(Direction::Backward, v.abs() as u32) };
-            println!("Impure debug {}", to_string(&tmp));
-            tmp
-        }
-        Ordering::Greater => {
-            let tmp = ImmutableLegacyTrainAdaptor { adaptee: LegacyTrain::new(Direction::Forward, v.abs() as u32) };
-            println!("Impure debug {}", to_string(&tmp));
-            tmp
-        }
-        Ordering::Equal => {
-            let tmp = ImmutableLegacyTrainAdaptor { adaptee: LegacyTrain::new(Direction::Forward, threshold as u32) };
-            println!("Impure debug {}", to_string(&tmp));
-            tmp
-        }
-    }
-}
-
-
-fn pluss_adaptee_recreation_strategy_by(d: &Direction, v: u32, t: Duration) -> ImmutableLegacyTrainAdaptor {
-    match *d {
-        Direction::Forward => {
-            let current_v = v as i32;
-            let v = current_v + (TRAIN_ACCELERATION * t.as_secs() as u32) as i32;
-            recreate_adaptee(v)
-        }
-        Direction::Backward => {
-            let current_v = -1 * (v as i32);
-            let v = current_v + (TRAIN_ACCELERATION * t.as_secs() as u32) as i32;
-            recreate_adaptee(v)
-        }
-    }
-}
-
-
-fn minuss_adaptee_recreation_strategy_by(d: &Direction, v: u32, t: Duration) -> ImmutableLegacyTrainAdaptor {
-    match *d {
-        Direction::Forward => {
-            let current_v = v as i32;
-            let v = current_v - (TRAIN_ACCELERATION * t.as_secs() as u32) as i32;
-            recreate_adaptee(v)
-        }
-        Direction::Backward => {
-            let current_v = -1 * (v as i32);
-            let v = current_v - (TRAIN_ACCELERATION * t.as_secs() as u32) as i32;
-            recreate_adaptee(v)
-        }
-    }
+fn accelerate_with<F>(lt: LegacyTrain, t: Duration, op: F) -> ImmutableLegacyTrainAdaptor
+    where F: FnOnce(i32, i32) -> i32 {
+    let v_0 = match lt.d {
+        Direction::Forward => lt.v as i32,
+        Direction::Backward => -1 * (lt.v as i32)
+    };
+    let v_t = op(v_0, (ACCELERATION * t.as_secs()) as i32);
+    let dir = match v_t.cmp(&0) {
+        Ordering::Less => Direction::Backward,
+        _ => Direction::Forward
+    };
+    ImmutableLegacyTrainAdaptor { adaptee: LegacyTrain::new(dir, v_t.abs() as u32) }
 }
 
 
 impl ChangeVelocity for ImmutableLegacyTrainAdaptor {
     fn accelerate(self, t: Duration) -> ImmutableLegacyTrainAdaptor {
-        pluss_adaptee_recreation_strategy_by(self.adaptee.get_dir(), self.adaptee.get_v(), t)
+        let fw_acceleration = |x, y| x + y;
+        accelerate_with(self.adaptee, t, fw_acceleration).textural_dump()
     }
 
     fn decelerate(self, t: Duration) -> ImmutableLegacyTrainAdaptor {
-        minuss_adaptee_recreation_strategy_by(self.adaptee.get_dir(), self.adaptee.get_v(), t)
+        let rev_acceleration = |x, y| x - y;
+        accelerate_with(self.adaptee, t, rev_acceleration).textural_dump()
+    }
+    fn textural_dump(self) -> ImmutableLegacyTrainAdaptor {
+        println!("Impure debug {}", to_string(&self));
+        self
+    }
+}
+
+
+impl Clone for ImmutableLegacyTrainAdaptor {
+    fn clone(&self) -> ImmutableLegacyTrainAdaptor {
+        ImmutableLegacyTrainAdaptor {
+            adaptee:
+            LegacyTrain::new(self.adaptee.d, self.adaptee.v)
+        }
     }
 }
 
@@ -90,10 +70,39 @@ pub fn functional_adapter_use() {
     let d2 = Duration::new(12, 0);
     //nowy bo to jest inny pociąg z dziedziny "pociągów z możliwymi prędkościami"
     // po n przekrztałeceniach
-    let new_algebraic_train = train.accelerate(d1)
+    let new_algebraic_train = train
+        .accelerate(d1)
         .decelerate(d1)
         .decelerate(d1)
         .decelerate(d2)
         .accelerate(d1);
     println!("{}", to_string(&new_algebraic_train));
+
+    println!("-------------------- {} --------------------", "collect() to final pos");
+
+    let legacy_train = LegacyTrain::new(Direction::Forward, 12);
+    let mut train = ImmutableLegacyTrainAdaptor { adaptee: legacy_train };
+    let accelerations: Vec<i32> = vec![5, -5, -5, -12, 5]; //Backward 1
+    let final_pos: Vec<ImmutableLegacyTrainAdaptor> = accelerations.iter().map(
+        |acc| {
+            match acc.cmp(&0) {
+                Ordering::Less =>
+                    {
+                        let v: i32 = *acc;
+                        let v = v.abs();
+                        train = train.clone().decelerate(Duration::new(v as u64, 0));
+                        train.clone()
+                    }
+                _ => {
+                    train = train.clone().accelerate(Duration::new(*acc as u64 as u64, 0));
+                    train.clone()
+                }
+            }
+        }).collect();
+
+    println!("{:?}", &final_pos);
+
+    for x in final_pos {
+        x.textural_dump();
+    }
 }
