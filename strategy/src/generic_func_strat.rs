@@ -25,6 +25,7 @@ fn sort<F, T: Ord + Clone>(v: &T, f: F) -> T where F: Fn(&T) -> T
 
 
 pub fn run() {
+    println!("-------------------- {} --------------------", file!());
     let mut rng = rand::thread_rng();
     for _ in 0..10 {
         if rng.gen() {
