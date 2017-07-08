@@ -9,15 +9,26 @@ fn stop(t: &Box<Fn() -> ()>) {
 }
 
 
+#[derive(Debug)]
+enum Vehicle {
+    Car,
+    Train
+}
+
+
 pub fn f_run() {
     println!("-------------------- {} --------------------", file!());
     let electric: &str = "electric";
     let diesel: &str = "diesel";
 
-    let train = |move_fn| -> Box<Fn() -> ()> {
-        Box::new(move || println!("train {}", move_fn))
+    let vehicle = |move_fn, vehicle| -> Box<Fn() -> ()> {
+        Box::new(move || println!("{:?} {}", move_fn, vehicle))
     };
-    let trains = vec![train(electric), train(diesel)];
+    let trains = vec![
+        vehicle(Vehicle::Train, electric),
+        vehicle(Vehicle::Train, diesel),
+        vehicle(Vehicle::Car, electric),
+    ];
     for t in trains {
         ride(&t);
         stop(&t);

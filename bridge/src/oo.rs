@@ -15,21 +15,43 @@ struct Train {
     engine: Engine
 }
 
+
+#[derive(Debug)]
+struct Car {
+    engine: Engine
+}
+
 impl Vehicle for Train {
     fn ride(&self) {
-        println!("Ride {:?}", self);
+        println!("Train ride {:?}", self);
     }
 
     fn stop(&self) {
-        println!("Stop {:?}", self);
+        println!("Train stop {:?}", self);
+    }
+}
+
+
+impl Vehicle for Car {
+    fn ride(&self) {
+        println!("Car ride {:?}", self);
+    }
+
+    fn stop(&self) {
+        println!("Car stop {:?}", self);
     }
 }
 
 
 pub fn oo_run() {
     println!("-------------------- {} --------------------", file!());
-    let trains = vec![Train { engine: Engine::Diesel }, Train { engine: Engine::Electric }];
-    for t in trains {
+
+    let dt = Train { engine: Engine::Diesel };
+    let et = Train { engine: Engine::Electric };
+    let ec = Car { engine: Engine::Electric };
+
+    let vehicles: Vec<&Vehicle> = vec![&dt, &et, &ec];
+    for t in vehicles {
         t.ride();
         t.stop();
     }
