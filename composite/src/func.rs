@@ -6,7 +6,7 @@ pub fn run() {
         })
     };
 
-
+//    let f: fn(i32) -> i32 = |x| x + 1; rust 1.9
     let paragraph = |fonts: Vec<Box<Fn()>>| {
         Box::new(move || {
             print!("<p>");
@@ -27,4 +27,9 @@ pub fn run() {
 
     let par = paragraph(vec![f1, f2]);
     par();
+
+
+
+
+
 }
