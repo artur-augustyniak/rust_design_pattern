@@ -6,15 +6,15 @@ fn interpret_with(expr: &str, env: &HashMap<String, i32>) -> i32 {
     let tokens: Vec<i32> = expr.split(" ").map(|t|
         match t {
             "+" => {
-                let l = stack.pop().unwrap();
-                let r = stack.pop().unwrap();
+                let l = stack.pop().expect("To few variables");
+                let r = stack.pop().expect("To few variables");
                 let sub = l + r;
                 stack.push(sub);
                 sub
             }
             "-" => {
-                let r = stack.pop().unwrap();
-                let l = stack.pop().unwrap();
+                let r = stack.pop().expect("To few variables");
+                let l = stack.pop().expect("To few variables");
                 let sub = l - r;
                 stack.push(sub);
                 sub
@@ -26,7 +26,14 @@ fn interpret_with(expr: &str, env: &HashMap<String, i32>) -> i32 {
             }
         }
     ).collect();
-    *(tokens.last().unwrap())
+
+    //invariant for proper input expression
+    if 1 != stack.len() {
+        panic!("non parsable RPN expression, too many variables");
+
+    }
+
+    *(tokens.last().expect("Empty result"))
 }
 
 
