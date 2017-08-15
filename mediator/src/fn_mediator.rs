@@ -1,69 +1,67 @@
-use std::collections::HashMap;
-
-
-fn interpret_with(expr: &str, env: &HashMap<String, i32>) -> i32 {
-    let mut stack: Vec<i32> = Vec::new();
-    let tokens: Vec<i32> = expr.split(" ").map(|t|
-        match t {
-            "+" => {
-                let l = stack.pop().expect("To few variables");
-                let r = stack.pop().expect("To few variables");
-                let sub = l + r;
-                stack.push(sub);
-                sub
-            }
-            "-" => {
-                let r = stack.pop().expect("To few variables");
-                let l = stack.pop().expect("To few variables");
-                let sub = l - r;
-                stack.push(sub);
-                sub
-            }
-            _ => {
-                let n = *(env.get(t).expect("Unresolved variable binding"));
-                stack.push(n);
-                n
-            }
-        }
-    ).collect();
-
-    //invariant for proper input expression
-    if 1 != stack.len() {
-        panic!("non parsable RPN expression, too many variables");
-
-    }
-
-    *(tokens.last().expect("Empty result"))
+#[derive(Debug)]
+enum Participant {
+    CAR,
+    TRAIN
 }
 
 
+#[derive(Debug)]
+enum ParticipantCommand {
+    GO,
+    STOP
+}
+
+fn move_barriers_mediator(p: &Participant, c: ParticipantCommand) {
+    println!("Mediation!");
+    match *p {
+        Participant::CAR => {
+            match c {
+                ParticipantCommand::GO => {
+                    println!("Opening barrier {:?} {:?}", c, p);
+                }
+                ParticipantCommand::STOP => {
+                    println!("Closing barrier {:?} {:?}", c, p);
+                }
+            }
+        }
+        Participant::TRAIN => {
+            match c {
+                ParticipantCommand::GO => {
+                    println!("Closing barrier {:?} {:?}", c, p);
+                }
+                ParticipantCommand::STOP => {
+                    println!("Opening barrier {:?} {:?}", c, p);
+                }
+            }
+        }
+    }
+}
+
+
+fn participant<F>(p: Participant, mediator: F) -> Box<Fn(ParticipantCommand)>
+    where F: Fn(&Participant, ParticipantCommand) + 'static {
+    Box::new(
+        move |action: ParticipantCommand| {
+            match action {
+                ParticipantCommand::GO => {
+                    mediator(&p, action);
+                    println!("{:?} passing!", p);
+                }
+                ParticipantCommand::STOP => {
+                    mediator(&p, action);
+                    println!("{:?} waiting!", p);
+                }
+            }
+        }
+    )
+}
+
 pub fn run() {
     println!("-------------------- {} --------------------", file!());
-    let expr = "a x - z +";
-    let vars: HashMap<String, i32> = [
-        ("a".to_string(), 2),
-        ("x".to_string(), 3),
-        ("z".to_string(), 5)
-    ].iter().cloned().collect();
-
-    println!("Expected 4 actual {}", interpret_with(expr, &vars));
-
-    let expr = "a x z - +";
-    let vars: HashMap<String, i32> = [
-        ("a".to_string(), 5),
-        ("x".to_string(), 10),
-        ("z".to_string(), 42)
-    ].iter().cloned().collect();
-
-    println!("Expected -27 actual {}", interpret_with(expr, &vars));
-
-
-    let expr = "a b c - +";
-    let vars: HashMap<String, i32> = [
-        ("a".to_string(), 5),
-        ("b".to_string(), 5),
-        ("c".to_string(), 10),
-    ].iter().cloned().collect();
-
-    println!("Expected 0 actual {}", interpret_with(expr, &vars));
+    let car = participant(Participant::CAR, move_barriers_mediator);
+    let train = participant(Participant::TRAIN, move_barriers_mediator);
+    car(ParticipantCommand::GO);
+    train(ParticipantCommand::GO);
+    car(ParticipantCommand::STOP);
+    train(ParticipantCommand::STOP);
 }
